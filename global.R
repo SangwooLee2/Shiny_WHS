@@ -10,30 +10,13 @@ library(RSQLite)
 library(shinyLP)
 
 ##
-# convert matrix to dataframe
-state_stat <- data.frame(state.name = rownames(state.x77), state.x77)
-# remove row names
-rownames(state_stat) <- NULL
-# create variable with colnames as choice
-choice <- colnames(state_stat)[-1]
-
-
-##
 whsites = read.csv(file = "./whc-sites-2018-2.csv")
 whsites = select(whsites, -name_fr, -short_description_fr, -justification_fr,
                  -C1,-C2,-C3,-C4,-C5,-C6,-N7,-N8,-N9,-N10, -states_name_fr, 
                  -region_fr)
-# choice <- colnames(whsites)
-
-
-if (FALSE){
-  g=ggplot(whsites_10more, aes(x=reorder(states_name_en, NoPerState), y=NoPerState)) 
-  g+geom_bar(aes(fill=states_name_en),stat = "identity") + coord_flip()
-  
-  ##
-  g2=ggplot(whsites_reg , aes(x=reorder(region_en, NoPerregion), y=NoPerregion)) 
-  g2+geom_bar(aes(fill=region_en),stat = "identity") + coord_flip()
-}
+whsites_s2 = whsites %>% group_by(., category, date_inscribed) %>% summarise(., total=n())
+whsites_s4 = whsites %>% filter(., region_en %in% c("Africa", "Arab States", "Asia and the Pacific", "Europe and North America", "Latin America and the Caribbean"))                                  
+whsites_s4 =  group_by(whsites_s4, region_en, date_inscribed) %>% summarise(., total=n())
 
 
 fluidRow(DT::dataTableOutput("Noperstate_table"))
@@ -42,8 +25,7 @@ fluidRow(DT::dataTableOutput("Noperstate_table"))
 # Noperstate_table
 
 ###
-whsites_10more = whsites %>% group_by(., states_name_en) %>% 
-  summarise( NoPerState = n()) %>% filter(., NoPerState>=10)
+whsites_10more = whsites %>% group_by(., states_name_en) %>% summarise( NoPerState = n()) %>% filter(., NoPerState>=10) 
 
 whsites_state = whsites %>% group_by(., states_name_en) %>% 
   summarise( NoPerState = n()) 
@@ -77,11 +59,8 @@ No_per_state = plot_ly(data = whsites_10more,
          )
 
 
-# choice2 <- colnames(whsites_10more)
-
 ####
-whsites_reg = whsites %>% group_by(., region_en) %>% 
-  summarise( NoPerregion = n()) 
+whsites_reg = whsites %>% filter(., region_en %in% c("Africa", "Arab States", "Asia and the Pacific", "Europe and North America", "Latin America and the Caribbean")) %>% group_by(., region_en) %>% summarise( NoPerregion = n()) 
 
 No_per_region = plot_ly(data = whsites_reg,
                        x = reorder(whsites_reg$region_en, whsites_reg$NoPerregion),
@@ -98,11 +77,49 @@ No_per_region = plot_ly(data = whsites_reg,
          yaxis = list(title = "No of sites listed")
          # autosize = T
          # autosize = T
-         )
-# choice3=colnames(whsites_reg)
+         ) # end of layout
+
+
 
 ##
-# choice = c(choice, choice2, choice3)
+No_per_year_world = plot_ly(data = whsites_s2,
+                        x = reorder(whsites_s2$date_inscribed, whsites_s2$category),
+                        y = whsites_s2$total,
+                        type = "scatter",
+                        mode = "lines",
+                        color = whsites_s2$category,
+                        showlegend = TRUE) %>%
+  layout(title = "No of sites newly listed per year",
+         margin = m, 
+         # xaxis = list(title = "", margin=m),
+         # xaxis = list(title = "No of sites listed"),
+         xaxis = list(title = "year",tickangle = 45),
+         # yaxis = list(title = "regions", margin=m)
+         yaxis = list(title = "No of sites newly listed")
+         # autosize = T
+         # autosize = T
+  )
+
+##
+No_per_year_region = plot_ly(data = whsites_s4,
+                            x = reorder(whsites_s4$date_inscribed, whsites_s4$region_en),
+                            y = whsites_s4$total,
+                            type = "scatter",
+                            mode = "lines",
+                            color = whsites_s4$region_en,
+                            showlegend = TRUE) %>%
+  layout(title = "No of sites newly listed per year per region",
+         margin = m, 
+         # xaxis = list(title = "", margin=m),
+         # xaxis = list(title = "No of sites listed"),
+         xaxis = list(title = "year",tickangle = 45),
+         # yaxis = list(title = "regions", margin=m)
+         yaxis = list(title = "No of sites newly listed")
+         # autosize = T
+         # autosize = T
+  )
+
+
 
 state_vec = sort(unique(whsites$states_name_en))
 region_vec = sort(unique(whsites$region_en))

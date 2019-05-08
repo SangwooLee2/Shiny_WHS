@@ -10,7 +10,7 @@ shinyUI(dashboardPage(
       menuItem("About", tabName = "about", icon = icon("book")),
       menuItem("Statistics", tabName = "statistics", icon = icon("line-chart")),
       menuItem("Data", tabName = "data", icon = icon("database")),
-      menuItem("Data by country", tabName = "pernation", icon = icon("database")),
+      menuItem("Data and statistics by country", tabName = "pernation", icon = icon("database")),
       menuItem("Locations on world map", tabName = "world", icon = icon("map"))      
     )
   ),
@@ -21,7 +21,7 @@ shinyUI(dashboardPage(
     tabItems(
       tabItem(tabName = "about",
               fluidPage(
-                h1("Unesco World Heritage Sites Shiny App", align="center"),
+                h1("Unesco World Heritage Sites Visualisation Using Shiny App", align="center"),
                 br(), 
                 br(), 
                 h3("This is a R-Shiny project created by using the dataset(*) provided by Unesco(**).",align="left"),
@@ -41,10 +41,13 @@ shinyUI(dashboardPage(
                 br(), 
                 br(), 
                 fluidRow(column(width = 6,plotlyOutput("No_per_state", height = 500)),
-                         column(width = 6, plotlyOutput("No_per_region", height = 500)))
+                         column(width = 6, plotlyOutput("No_per_region", height = 500))),
                 # ,
                 # fluidRow(DT::dataTableOutput("Noperstate_table"))
-                
+                br(), 
+                br(),     
+                fluidRow(column(width = 6,plotlyOutput("No_per_year_world", height = 500)),
+                         column(width = 6, plotlyOutput("No_per_year_region", height = 500)))                
               )),      
         
       tabItem(tabName = "data",
@@ -55,7 +58,7 @@ shinyUI(dashboardPage(
       
       tabItem(tabName = "pernation",
               fluidPage(
-                h1("Data of world heritage sites by country", align="center"),
+                h1("Data and statistics of world heritage sites by country", align="center"),
                 br(),
 
                 
@@ -64,7 +67,10 @@ shinyUI(dashboardPage(
               
                 fluidRow(DT::dataTableOutput("whsites_state_cat")),
                 
-                fluidRow(column(width = 6,plotlyOutput("BarplotPerYearPerNation", height = 500)))
+                # fluidRow(column(width = 4, selectizeInput('country', label = "country", choices = state_vec ))),
+                br(), 
+                br(), 
+                fluidRow(column(width = 6,plotlyOutput("BarplotPerYearPerNation", height = 700)))
               )),      
       
       tabItem(tabName = "world",
@@ -75,9 +81,6 @@ shinyUI(dashboardPage(
                 column(width = 12, plotlyOutput("world_map", height = 900), solidHeader = TRUE, status = "primary")
               )
       )
-      
-      
-      
     )
   )
 ))
